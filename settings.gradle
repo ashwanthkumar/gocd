@@ -23,6 +23,7 @@ include 'domain'
 include 'commandline'
 include ':db'
 include ':database'
+include ':mysql-addon'
 include ':go-plugin-api-internal'
 include ':go-plugin-api'
 include ':go-plugin-domain'
@@ -60,6 +61,7 @@ project(':db').projectDir = "$rootDir/db" as File
 project(':database').projectDir = "$rootDir/addon-api/database" as File
 project(':commandline').projectDir = "$rootDir/commandline" as File
 project(':domain').projectDir = "$rootDir/domain" as File
+project(':mysql-addon').projectDir = "$rootDir/addon-api/mysql-addon" as File
 project(':go-plugin-api-internal').projectDir = "$rootDir/plugin-infra/go-plugin-api-internal" as File
 project(':go-plugin-api').projectDir = "$rootDir/plugin-infra/go-plugin-api" as File
 project(':go-plugin-activator').projectDir = "$rootDir/plugin-infra/go-plugin-activator" as File

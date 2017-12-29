@@ -94,6 +94,7 @@ dependencies {
   compile project(':go-plugin-access')
   compile project(':common')
   compile project(':rack_hack')
+  compile project(':mysql-addon')
 
   copyOnly project(path: ':tfs-impl-14', configuration: 'fatJarConfig')
   copyOnly project(path: ':agent', configuration: 'fatJarConfig')
