@@ -21,39 +21,35 @@ package in.ashwanthkumar.gocd.database.mysql5;
  * for MySQL5 database
  */
 
-import com.dbdeploy.AppliedChangesProvider;
-import com.dbdeploy.AvailableChangeScriptsProvider;
-import com.dbdeploy.ChangeScriptApplier;
 import com.dbdeploy.Controller;
 import com.dbdeploy.appliers.TemplateBasedApplier;
 import com.dbdeploy.appliers.UndoTemplateBasedApplier;
 import com.dbdeploy.database.changelog.DatabaseSchemaVersionManager;
 import com.dbdeploy.database.changelog.QueryExecuter;
-import com.dbdeploy.scripts.ChangeScript;
 import com.dbdeploy.scripts.ChangeScriptRepository;
 import com.dbdeploy.scripts.DirectoryScanner;
 import com.thoughtworks.go.util.SystemEnvironment;
 import in.ashwanthkumar.gocd.database.mysql5.migration.Patcher;
 import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.*;
 import java.sql.SQLException;
-import java.util.List;
 
 import static com.thoughtworks.go.util.ExceptionUtils.bomb;
 import static com.thoughtworks.go.util.ExceptionUtils.bombUnless;
 
-public class DbDeployMigration {
-    private static final Logger LOG = LoggerFactory.getLogger(DbDeployMigration.class);
+public class MySQLDbDeployMigration {
+    private static final Logger LOG = LoggerFactory.getLogger(MySQLDbDeployMigration.class);
     public static final String CHANGELOG_TABLE_NAME = "changelog";
 
     private final SystemEnvironment env;
     private final BasicDataSource dataSource;
 
-    public DbDeployMigration(BasicDataSource dataSource, SystemEnvironment env) {
+    public MySQLDbDeployMigration(BasicDataSource dataSource, SystemEnvironment env) {
         this.dataSource = dataSource;
         this.env = env;
     }
@@ -86,8 +82,13 @@ public class DbDeployMigration {
                 builder.append(Patcher.applyPatch(line));
                 builder.append("\n");
             }
-            System.out.println("Changes to apply are " + builder.toString());
-            new JdbcTemplate(dataSource).execute(builder.toString());
+            String finalSQL = builder.toString();
+            if (StringUtils.isNotBlank(finalSQL)) {
+                System.out.println("Changes to apply are " + finalSQL);
+                new JdbcTemplate(dataSource).execute(finalSQL);
+            } else {
+                System.out.println("No changes to apply, skipping and moving on.");
+            }
         } catch (Exception e) {
             String message = "Unable to create database upgrade script for database " + dataSource.getUrl() + ". The problem was: " + e.getMessage();
             if (e.getCause() != null) {

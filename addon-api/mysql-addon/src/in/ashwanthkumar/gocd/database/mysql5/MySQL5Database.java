@@ -15,7 +15,7 @@ import java.util.List;
 
 public class MySQL5Database implements Database {
     private static final Logger LOG = LoggerFactory.getLogger(MySQL5Database.class);
-    static final String DIALECT_MYSQL = "org.hibernate.dialect.MySQLDialect";
+    static final String DIALECT_MYSQL = "in.ashwanthkumar.gocd.database.mysql5.CustomMySQL5Dialect";
     private final MySQL5Configuration configuration;
     private final SystemEnvironment systemEnvironment;
     private BasicDataSource dataSource;
@@ -56,7 +56,7 @@ public class MySQL5Database implements Database {
             //don't upgrade
         } else {
             LOG.info("Starting MySQLDeployMigration");
-            DbDeployMigration migrateSchema = new DbDeployMigration(dataSource, systemEnvironment);
+            MySQLDbDeployMigration migrateSchema = new MySQLDbDeployMigration(dataSource, systemEnvironment);
             migrateSchema.migrate("mysql");
             LOG.info("MySQLDeployMigration is complete");
         }
@@ -121,8 +121,8 @@ public class MySQL5Database implements Database {
 
             @Override
             public String retrievePipelineTimeline() {
-                return "SELECT CAST(p.name AS VARCHAR), p.id AS p_id, p.counter, m.modifiedtime, "
-                        + " (SELECT CAST(materials.fingerprint AS VARCHAR) FROM materials WHERE id = m.materialId), naturalOrder, m.revision, pmr.folder, pmr.toRevisionId AS mod_id, pmr.Id as pmrid "
+                return "SELECT p.name, p.id AS p_id, p.counter, m.modifiedtime, "
+                        + " (SELECT materials.fingerprint FROM materials WHERE materials.id = m.materialId), naturalOrder, m.revision, pmr.folder, pmr.toRevisionId AS mod_id, pmr.Id as pmrid "
                         + "FROM pipelines p, pipelinematerialrevisions pmr, modifications m "
                         + "WHERE p.id = pmr.pipelineid "
                         + "AND pmr.torevisionid = m.id "
@@ -132,7 +132,7 @@ public class MySQL5Database implements Database {
 
     }
 
-    private BasicDataSource getDataSource() {
+    public BasicDataSource getDataSource() {
         if (this.dataSource == null) {
             // TODO - Add support for DBDebug mode?
             BasicDataSource source = new BasicDataSource();

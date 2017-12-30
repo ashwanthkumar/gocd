@@ -11,6 +11,8 @@ public class Patcher {
         add(new ReservedWordWrapper());
         add(new SingleLineComment());
         add(new ConvertToSignedInteger());
+        add(new AlterColumn());
+        add(new VarcharIgnoreCaseToTextCollate());
     }};
 
     public static String applyPatch(String line) {
