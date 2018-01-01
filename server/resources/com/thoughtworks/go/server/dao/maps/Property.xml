@@ -26,13 +26,6 @@
         </selectKey>
     </insert>
 
-    <insert id="saveProperty-mysql5" parameterClass="java.util.Map">
-        INSERT INTO properties (buildId, `key`, value) VALUES (#instanceId#, #propertyName#, #value#)
-        <selectKey resultClass="long" keyProperty="id" type="post">
-            CALL IDENTITY();
-        </selectKey>
-    </insert>
-
     <select id="getProperty" parameterClass="java.util.Map" resultClass="java.lang.String">
         SELECT value FROM properties
         WHERE buildId = #instanceId# AND key = #propertyName#
@@ -42,12 +35,6 @@
         SELECT key, value FROM properties
         WHERE buildId = #value#
         ORDER BY key
-    </select>
-
-    <select id="getAllPropertiesByBuildInstanceId-mysql5" parameterClass="long" resultClass="com.thoughtworks.go.domain.Property">
-        SELECT `key`, value FROM properties
-        WHERE buildId = #value#
-        ORDER BY `key`
     </select>
 
     <select id="pipelineIdByLabel" resultClass="long">
@@ -88,21 +75,6 @@
             key = #propertyName#
         </isPropertyAvailable>
         ORDER BY builds.id, key
-    </select>
-
-    <select id="getAllPropertiesHistory-mysql5" resultClass="java.util.HashMap">
-        SELECT pipelines.id AS pipelineid, `key` AS key, value AS value
-        FROM properties
-        INNER JOIN builds ON builds.id = properties.buildId AND builds.name = #build#
-        INNER JOIN stages ON stages.id = builds.stageId AND stages.name = #stage#
-        INNER JOIN pipelines ON pipelines.id = stages.pipelineId AND
-        pipelines.name = #pipeline# AND
-        pipelines.id &lt;= #maxId# AND
-        pipelines.id &gt;= #minId#
-        <isPropertyAvailable property="propertyName" prepend="WHERE">
-            `key` = #propertyName#
-        </isPropertyAvailable>
-        ORDER BY builds.id, `key`
     </select>
 
 </sqlMap>

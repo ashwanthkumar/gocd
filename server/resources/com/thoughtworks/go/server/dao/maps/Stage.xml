@@ -232,15 +232,6 @@
         LIMIT 1
     </select>
 
-    <select id="getMostRecentCompletedStage-mysql5" resultMap="select-stage-without-builds">
-        SELECT id as stageId, name as stageName, result as stageResult, counter as stageCounter, state as stageState, s.*
-        FROM _stages s
-        WHERE pipelineName = #pipelineName# AND name = #stageName#
-        AND result IS NOT NULL AND result != 'Unknown'
-        ORDER BY id DESC
-        LIMIT 1
-    </select>
-
     <select id="findFailedStagesBetween" resultMap="stageIdentifier-without-id">
         SELECT name as stageName, max(counter) as stageCounter,  pipelineName,  pipelineCounter,  pipelineLabel
         FROM _stages
@@ -537,32 +528,10 @@
         LIMIT #limit# OFFSET #offset#
     </select>
 
-    <select id="findStageHistoryPage-mysql5" resultMap="select-stage-history-entry">
-        SELECT
-            id as stageId, name as stageName, counter as stageCounter, state as stageState, s.*
-        FROM _stages s
-        WHERE name = #stageName#
-        AND pipelineName = #pipelineName#
-        ORDER BY id DESC
-        LIMIT #limit# OFFSET #offset#
-    </select>
-
     <select id="findStageHistoryEntryBefore" resultMap="select-stage-history-entry">
         SELECT
             id as stageId, name as stageName, counter as stageCounter, state as stageState, *
         FROM _stages
-        WHERE
-          name = #stageName#
-          AND pipelineName = #pipelineName#
-          AND id > #id#
-        ORDER BY id
-        LIMIT #limit#
-    </select>
-
-    <select id="findStageHistoryEntryBefore-mysql5" resultMap="select-stage-history-entry">
-        SELECT
-            id as stageId, name as stageName, counter as stageCounter, state as stageState, s.*
-        FROM _stages s
         WHERE
           name = #stageName#
           AND pipelineName = #pipelineName#
@@ -760,45 +729,6 @@
         buildstatetransitions.currentState, buildstatetransitions.statechangetime, buildstatetransitions.id as stateId
         FROM stages
         JOIN pipelines ON pipelines.id = stages.pipelineId AND CAST(pipelines.name as VARCHAR) = #pipelineName#
-        <isNotNull property="pipelineLabel" prepend="AND">
-            pipelines.label = #pipelineLabel#
-        </isNotNull>
-        <isNotNull property="pipelineCounter" prepend="AND">
-            pipelines.counter = #pipelineCounter#
-        </isNotNull>
-        JOIN builds ON stages.id = builds.stageId AND builds.ignored != true
-        LEFT JOIN buildstatetransitions ON builds.id = buildstatetransitions.buildId
-        WHERE
-        stages.name = #stageName#
-        AND stages.counter = #stageCounter#
-        ORDER BY builds.name, buildstatetransitions.id
-    </select>
-
-    <select id="findStageWithJobsByIdentifier-mysql5" resultMap="select-stage-build-map">
-        SELECT builds.*, builds.id as buildId,
-        stages.name as stageName,
-        stages.counter as stageCounter,
-        stages.pipelineId as pipelineId,
-        stages.approvedBy,
-        stages.createdTime,
-        stages.orderId,
-        stages.result as stageResult,
-        stages.completedByTransitionId as completedByTransitionId,
-        stages.state as stageState,
-        stages.approvalType,
-        stages.latestRun,
-        stages.fetchMaterials,
-        stages.cleanWorkingDir,
-        stages.rerunOfCounter,
-        stages.artifactsDeleted,
-        stages.configVersion,
-        stages.lastTransitionedTime,
-        pipelines.name as pipelineName,
-        pipelines.counter as pipelineCounter,
-        pipelines.label as pipelineLabel,
-        buildstatetransitions.currentState, buildstatetransitions.statechangetime, buildstatetransitions.id as stateId
-        FROM stages
-        JOIN pipelines ON pipelines.id = stages.pipelineId AND CAST(pipelines.name as CHAR) = #pipelineName#
         <isNotNull property="pipelineLabel" prepend="AND">
             pipelines.label = #pipelineLabel#
         </isNotNull>
