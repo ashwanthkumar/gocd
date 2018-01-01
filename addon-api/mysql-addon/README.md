@@ -1,5 +1,11 @@
 # MySQL5 Addon for GoCD
 
+### TODO
+- [x] Working version of `Database` and `QueryExtensions` implementation for MySQL5
+- [x] Patch all the iBatis SQLMap xml files to override specific queries for MySQL5
+- [ ] Migration Tool for moving data from an existing H2 -> new MySQL (just like in Postgres Addon)
+- [ ] Package MySQL Addon as a separate JAR on a new repo
+
 init.sql that needs to be run to setup a MySQL server
 ```sql
 create database cruise default CHARACTER set utf8 default COLLATE utf8_general_ci;

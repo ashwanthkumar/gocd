@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2018 ThoughtWorks, Inc.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="BuildInstance">
+
+    <select id="findJobId-mysql5" resultMap="jobIdentifier">
+        SELECT pipelineName, pipelineCounter, pipelineLabel, stageName, stageCounter, name, id AS buildId, rerunOfCounter
+        FROM _builds WHERE id IN (
+            SELECT id FROM (SELECT id <include refid="select-job-id"/> AND originaljobid IS NULL) AS inner1
+            UNION
+            SELECT originalJobId AS id FROM (SELECT originalJobId <include refid="select-job-id"/> AND originaljobid IS NOT NULL) AS inner2
+        )
+        ORDER BY scheduledDate DESC
+        LIMIT 1
+    </select>
+
+</sqlMap>

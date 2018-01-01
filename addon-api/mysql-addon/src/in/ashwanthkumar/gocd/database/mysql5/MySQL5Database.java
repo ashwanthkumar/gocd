@@ -73,9 +73,10 @@ public class MySQL5Database implements Database {
         // TODO - Implement backup method
     }
 
+    // This is configured via SqlMapClientFactory to append custom ibatis SQLMap xml files
     @Override
     public String getIbatisConfigXmlLocation() {
-        return null;
+        return "/ibatis-overrides.xml";
     }
 
     @Override

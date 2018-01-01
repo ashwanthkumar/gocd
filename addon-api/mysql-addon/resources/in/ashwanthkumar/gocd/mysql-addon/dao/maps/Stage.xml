@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2018 ThoughtWorks, Inc.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Stage">
+
+    <select id="getMostRecentCompletedStage-mysql5" resultMap="select-stage-without-builds">
+        SELECT id as stageId, name as stageName, result as stageResult, counter as stageCounter, state as stageState, s.*
+        FROM _stages s
+        WHERE pipelineName = #pipelineName# AND name = #stageName#
+        AND result IS NOT NULL AND result != 'Unknown'
+        ORDER BY id DESC
+        LIMIT 1
+    </select>
+
+    <select id="findStageHistoryPage-mysql5" resultMap="select-stage-history-entry">
+        SELECT
+            id as stageId, name as stageName, counter as stageCounter, state as stageState, s.*
+        FROM _stages s
+        WHERE name = #stageName#
+        AND pipelineName = #pipelineName#
+        ORDER BY id DESC
+        LIMIT #limit# OFFSET #offset#
+    </select>
+
+    <select id="findStageHistoryEntryBefore-mysql5" resultMap="select-stage-history-entry">
+        SELECT
+            id as stageId, name as stageName, counter as stageCounter, state as stageState, s.*
+        FROM _stages s
+        WHERE
+          name = #stageName#
+          AND pipelineName = #pipelineName#
+          AND id > #id#
+        ORDER BY id
+        LIMIT #limit#
+    </select>
+
+    <select id="findStageWithJobsByIdentifier-mysql5" resultMap="select-stage-build-map">
+        SELECT builds.*, builds.id as buildId,
+        stages.name as stageName,
+        stages.counter as stageCounter,
+        stages.pipelineId as pipelineId,
+        stages.approvedBy,
+        stages.createdTime,
+        stages.orderId,
+        stages.result as stageResult,
+        stages.completedByTransitionId as completedByTransitionId,
+        stages.state as stageState,
+        stages.approvalType,
+        stages.latestRun,
+        stages.fetchMaterials,
+        stages.cleanWorkingDir,
+        stages.rerunOfCounter,
+        stages.artifactsDeleted,
+        stages.configVersion,
+        stages.lastTransitionedTime,
+        pipelines.name as pipelineName,
+        pipelines.counter as pipelineCounter,
+        pipelines.label as pipelineLabel,
+        buildstatetransitions.currentState, buildstatetransitions.statechangetime, buildstatetransitions.id as stateId
+        FROM stages
+        JOIN pipelines ON pipelines.id = stages.pipelineId AND CAST(pipelines.name as CHAR) = #pipelineName#
+        <isNotNull property="pipelineLabel" prepend="AND">
+            pipelines.label = #pipelineLabel#
+        </isNotNull>
+        <isNotNull property="pipelineCounter" prepend="AND">
+            pipelines.counter = #pipelineCounter#
+        </isNotNull>
+        JOIN builds ON stages.id = builds.stageId AND builds.ignored != true
+        LEFT JOIN buildstatetransitions ON builds.id = buildstatetransitions.buildId
+        WHERE
+        stages.name = #stageName#
+        AND stages.counter = #stageCounter#
+        ORDER BY builds.name, buildstatetransitions.id
+    </select>
+
+</sqlMap>
