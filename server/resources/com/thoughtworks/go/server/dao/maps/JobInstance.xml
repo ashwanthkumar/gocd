@@ -149,6 +149,17 @@
         LIMIT 1
     </select>
 
+    <select id="findJobId-mysql5" resultMap="jobIdentifier">
+        SELECT pipelineName, pipelineCounter, pipelineLabel, stageName, stageCounter, name, id AS buildId, rerunOfCounter
+        FROM _builds WHERE id IN (
+            SELECT id FROM (SELECT id <include refid="select-job-id"/> AND originaljobid IS NULL) AS inner1
+            UNION
+            SELECT originalJobId AS id FROM (SELECT originalJobId <include refid="select-job-id"/> AND originaljobid IS NOT NULL) AS inner2
+        )
+        ORDER BY scheduledDate DESC
+        LIMIT 1
+    </select>
+
     <cacheModel id="find-job-id-by-label" type="MEMORY" readOnly="true">
         <flushInterval seconds="300"/>
         <flushOnExecute statement="insertBuild"/>
