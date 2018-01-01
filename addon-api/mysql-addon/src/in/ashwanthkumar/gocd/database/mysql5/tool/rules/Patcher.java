@@ -1,4 +1,4 @@
-package in.ashwanthkumar.gocd.database.mysql5.migration;
+package in.ashwanthkumar.gocd.database.mysql5.tool.rules;
 
 import java.util.ArrayList;
 import java.util.List;

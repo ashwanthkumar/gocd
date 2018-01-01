@@ -1,6 +1,6 @@
-package in.ashwanthkumar.gocd.database.mysql5.migration;
+package in.ashwanthkumar.gocd.database.mysql5.tool.rules;
 
-public class ConvertToSignedInteger implements DDLPatch{
+public class ConvertToSignedInteger implements DDLPatch {
     @Override
     public boolean shouldPatch(String line) {
         return line.contains("CONVERT(id, INTEGER)");

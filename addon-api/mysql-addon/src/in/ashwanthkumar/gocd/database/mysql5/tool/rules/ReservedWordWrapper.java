@@ -1,4 +1,4 @@
-package in.ashwanthkumar.gocd.database.mysql5.migration;
+package in.ashwanthkumar.gocd.database.mysql5.tool.rules;
 
 import in.ashwanthkumar.utils.collections.Iterables;
 import in.ashwanthkumar.utils.collections.Lists;
@@ -71,11 +71,11 @@ public class ReservedWordWrapper implements DDLPatch {
 
         public String escape(String line) {
             return line
-                    .replace("(" + keyword + ")", "(`" + keyword + "`)")
-                    .replace(keyword + ")", "`" + keyword + "`)")
-                    .replace("(" + keyword, "(`" + keyword + "`")
-                    .replace("." + keyword, ".`" + keyword + "`")
-                    .replaceAll("^(\\s*)" + keyword + " ", "`" + keyword + "` ");
+                    .replaceAll("\\(" + keyword + "\\)", "(`" + keyword + "`)")
+                    .replaceAll(keyword + "\\)", "`" + keyword + "`)")
+                    .replaceAll("\\(" + keyword, "(`" + keyword + "`")
+                    .replaceAll("\\." + keyword, ".`" + keyword + "`")
+                    .replaceAll( "(^\\s)*" + keyword + " ", "`" + keyword + "` ");
         }
     }
 }

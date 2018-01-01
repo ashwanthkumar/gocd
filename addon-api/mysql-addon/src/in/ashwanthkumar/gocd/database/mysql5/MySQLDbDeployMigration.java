@@ -29,7 +29,7 @@ import com.dbdeploy.database.changelog.QueryExecuter;
 import com.dbdeploy.scripts.ChangeScriptRepository;
 import com.dbdeploy.scripts.DirectoryScanner;
 import com.thoughtworks.go.util.SystemEnvironment;
-import in.ashwanthkumar.gocd.database.mysql5.migration.Patcher;
+import in.ashwanthkumar.gocd.database.mysql5.tool.rules.Patcher;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;

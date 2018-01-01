@@ -1,4 +1,4 @@
-package in.ashwanthkumar.gocd.database.mysql5.migration;
+package in.ashwanthkumar.gocd.database.mysql5.tool.rules;
 
 // PATCH migration scripts because of MySQL's comment handling policy
 // Ref - http://dev.mysql.com/doc/refman/5.7/en/ansi-diff-comments.html

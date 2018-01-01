@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package in.ashwanthkumar.gocd.database.mysql5.migration;
+package in.ashwanthkumar.gocd.database.mysql5.tool.rules;
 
 public class VarcharIgnoreCaseToTextCollate implements DDLPatch {
     @Override
