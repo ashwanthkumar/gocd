@@ -38,13 +38,13 @@
     <resultMap id="select-build-with-identifier"
                class="com.thoughtworks.go.domain.JobInstance"
                extends="select-build-map">
-        <result property="identifier" resultMap="BuildInstance.jobIdentifier"/>        
+        <result property="identifier" resultMap="BuildInstance.jobIdentifier"/>
     </resultMap>
 
     <resultMap id="select-build-with-identifier-transitions"
-            class="com.thoughtworks.go.domain.JobInstance"
-            extends="select-build-with-identifier"
-            groupBy="id" >
+               class="com.thoughtworks.go.domain.JobInstance"
+               extends="select-build-with-identifier"
+               groupBy="id" >
         <result property="transitions" resultMap="BuildStateTransition.build-transition"/>
     </resultMap>
 
@@ -100,10 +100,10 @@
         SELECT *, id AS buildId
         FROM _builds
         WHERE state = 'Completed'
-            AND name = #jobConfigName#
-            AND pipelineName = #pipelineName#
-            AND stageName = #stageName#
-            AND originalJobId IS NULL
+        AND name = #jobConfigName#
+        AND pipelineName = #pipelineName#
+        AND stageName = #stageName#
+        AND originalJobId IS NULL
         ORDER BY id DESC
         LIMIT #count#
     </select>
@@ -111,19 +111,19 @@
     <select id="getJobHistoryCount" resultClass="java.lang.Integer" cacheModel="latest-completed-job-instances">
         SELECT COUNT(1)
         FROM _builds
-            WHERE name = #jobConfigName#
-                AND pipelineName = #pipelineName#
-                AND stageName = #stageName#
-                AND originalJobId IS NULL
+        WHERE name = #jobConfigName#
+        AND pipelineName = #pipelineName#
+        AND stageName = #stageName#
+        AND originalJobId IS NULL
     </select>
 
     <select id="findJobHistoryPage" resultMap="select-build-with-identifier" cacheModel="latest-completed-job-instances">
         SELECT *, id AS buildId
         FROM _builds
         WHERE name = #jobConfigName#
-            AND pipelineName = #pipelineName#
-            AND stageName = #stageName#
-            AND originalJobId IS NULL
+        AND pipelineName = #pipelineName#
+        AND stageName = #stageName#
+        AND originalJobId IS NULL
         ORDER BY id DESC
         LIMIT #count# OFFSET #offset#
     </select>
@@ -131,19 +131,19 @@
     <sql id="select-job-id">
         FROM _builds
         WHERE name = #jobName# AND ignored != true
-            AND stageName = #stageName# AND stageCounter = #stageCounter#
-            AND pipelineName = #pipelineName# AND pipelineLabel = #pipelineLabel#
-            <isNotNull property="pipelineCounter" prepend="AND">
-                pipelineCounter = #pipelineCounter#
-            </isNotNull>
+        AND stageName = #stageName# AND stageCounter = #stageCounter#
+        AND pipelineName = #pipelineName# AND pipelineLabel = #pipelineLabel#
+        <isNotNull property="pipelineCounter" prepend="AND">
+            pipelineCounter = #pipelineCounter#
+        </isNotNull>
     </sql>
 
     <select id="findJobId" resultMap="jobIdentifier">
         SELECT pipelineName, pipelineCounter, pipelineLabel, stageName, stageCounter, name, id AS buildId, rerunOfCounter
         FROM _builds WHERE id IN (
-            (SELECT id FROM (SELECT id <include refid="select-job-id"/> AND originaljobid IS NULL) AS inner1)
-            UNION
-            (SELECT originalJobId AS id FROM (SELECT originalJobId <include refid="select-job-id"/> AND originaljobid IS NOT NULL) AS inner2)
+        (SELECT id FROM (SELECT id <include refid="select-job-id"/> AND originaljobid IS NULL) AS inner1)
+        UNION
+        (SELECT originalJobId AS id FROM (SELECT originalJobId <include refid="select-job-id"/> AND originaljobid IS NOT NULL) AS inner2)
         )
         ORDER BY scheduledDate DESC
         LIMIT 1
@@ -168,34 +168,30 @@
     </resultMap>
 
     <select id="select-job-plan" resultMap="select-job-plan">
-        SELECT b.*, b.id as buildId,
-            a.id as artifactId, a.src as artifactSrc, a.dest as artifactDest, a.artifactType
-        FROM _builds b
-        LEFT JOIN artifactPlans a ON b.id = a.buildId
+        SELECT b.*, b.id as buildId FROM _builds b
         WHERE b.id = #jobId#
-        ORDER BY b.scheduledDate ASC
     </select>
 
     <select id="scheduledPlan" resultMap="select-job-plan">
         SELECT builds.*, builds.id as buildId,
-            builds.agentuuid as agentUuid,
-            artifactPlans.id as artifactId, artifactPlans.src as artifactSrc, artifactPlans.dest as artifactDest,
-            artifactPlans.artifactType as artifactType,
-            stages.name as stageName,
-            stages.counter as stageCounter,
-            stages.fetchMaterials as fetchMaterials,
-            stages.cleanWorkingDir as cleanWorkingDir,
-            stages.rerunOfCounter as rerunOfCounter,
-            pipelines.name as pipelineName,
-            pipelines.counter as pipelineCounter,
-            pipelines.label as pipelineLabel,
-            pipelines.id as pipelineId
+        builds.agentuuid as agentUuid,
+        artifactPlans.id as artifactId, artifactPlans.src as artifactSrc, artifactPlans.dest as artifactDest,
+        artifactPlans.artifactType as artifactType,
+        stages.name as stageName,
+        stages.counter as stageCounter,
+        stages.fetchMaterials as fetchMaterials,
+        stages.cleanWorkingDir as cleanWorkingDir,
+        stages.rerunOfCounter as rerunOfCounter,
+        pipelines.name as pipelineName,
+        pipelines.counter as pipelineCounter,
+        pipelines.label as pipelineLabel,
+        pipelines.id as pipelineId
         FROM builds
         LEFT JOIN artifactPlans ON builds.id = artifactPlans.buildId
         INNER JOIN stages ON stages.id = builds.stageId
         INNER JOIN pipelines ON pipelines.id = stages.pipelineId
         WHERE builds.state = 'Scheduled'
-            AND builds.id = #id#
+        AND builds.id = #id#
         ORDER BY builds.scheduledDate ASC
     </select>
 
@@ -213,47 +209,47 @@
     </select>
 
     <select id="buildByIdWithTransitions" resultMap="select-build-with-identifier-transitions">
-       SELECT builds.*, builds.id as buildId,
-       buildstatetransitions.currentState, buildstatetransitions.statechangetime, buildstatetransitions.id as stateId,
+        SELECT builds.*, builds.id as buildId,
+        buildstatetransitions.currentState, buildstatetransitions.statechangetime, buildstatetransitions.id as stateId,
         stages.name as stageName,
         stages.counter as stageCounter,
         pipelines.name as pipelineName,
         pipelines.counter as pipelineCounter,
         pipelines.label as pipelineLabel,
         stages.rerunOfCounter as rerunOfCounter
-       FROM builds
-       LEFT JOIN buildstatetransitions ON builds.id = buildstatetransitions.buildId
+        FROM builds
+        LEFT JOIN buildstatetransitions ON builds.id = buildstatetransitions.buildId
         INNER JOIN stages ON stages.id = builds.stageId
         INNER JOIN pipelines ON stages.pipelineId = pipelines.id
-       WHERE builds.id = #value#
-       ORDER BY buildstatetransitions.id ASC 
+        WHERE builds.id = #value#
+        ORDER BY buildstatetransitions.id ASC
     </select>
 
     <select id="buildById" resultMap="select-build-with-identifier">
-       SELECT *, id as buildId
-       FROM _builds
-       WHERE id = #value#
+        SELECT *, id as buildId
+        FROM _builds
+        WHERE id = #value#
     </select>
 
     <select id="getLastSuccessfulBuildIdOnAgent" resultClass="long">
         SELECT id
         FROM _builds
         WHERE name = #buildName#
-            AND agentUuid = #agentUuid#
-            AND state = 'Completed'
-            AND result = 'Passed'
-            AND stageName = #stageName#
-            AND pipelineName = #pipelineName#
+        AND agentUuid = #agentUuid#
+        AND state = 'Completed'
+        AND result = 'Passed'
+        AND stageName = #stageName#
+        AND pipelineName = #pipelineName#
         ORDER BY id DESC
         LIMIT 1
     </select>
 
     <sql id="select-builds-with-identifier">
         SELECT
-            *, id AS buildId
+        *, id AS buildId
         FROM _builds
     </sql>
-    
+
     <select id="getLatestInProgressBuildOnAgent" resultMap="select-build-with-identifier">
         <include refid="select-builds-with-identifier"/>
         WHERE agentUuid = #agentId#
@@ -265,9 +261,9 @@
         <include refid="select-builds-with-identifier"/>
         WHERE agentUuid NOT IN ($liveAgentIdList$) AND state in ('Assigned', 'Preparing', 'Building', 'Completing')
         <!--SELECT *, id AS buildId-->
-            <!--FROM TABLE(X VARCHAR=#liveAgentIdList#) T-->
-            <!--INNER JOIN _builds AS b ON b.agentUuid != T.X-->
-            <!--WHERE state IN ('Assigned', 'Preparing', 'Building', 'Completing');-->
+        <!--FROM TABLE(X VARCHAR=#liveAgentIdList#) T-->
+        <!--INNER JOIN _builds AS b ON b.agentUuid != T.X-->
+        <!--WHERE state IN ('Assigned', 'Preparing', 'Building', 'Completing');-->
     </select>
 
     <select id="buildInstanceExists" resultClass="java.lang.Boolean">
@@ -279,8 +275,8 @@
         INNER JOIN stages ON stages.id = builds.stageId
         INNER JOIN pipelines ON pipelines.id = stages.pipelineId
         WHERE stages.name = #stageName#
-            AND builds.name = #buildName#
-            AND pipelines.name = #pipelineName#
+        AND builds.name = #buildName#
+        AND pipelines.name = #pipelineName#
     </select>
 
     <update id="updateAssignedInfo" parameterClass="com.thoughtworks.go.domain.JobInstance">
@@ -368,25 +364,25 @@
         buildstatetransitions.stateChangeTime as stateChangeTime
         FROM
         (
-            SELECT
-            builds.*,
-            bst.stateChangeTime as lastTransitionTime,
-            pipelines.name AS pipelineName,
-            pipelines.label AS pipelineLabel,
-            stages.name AS stageName,
-            pipelines.counter AS pipelineCounter,
-            stages.counter AS stageCounter,
-            stages.rerunOfCounter AS rerunOfCounter
-            FROM builds
-            INNER JOIN stages on builds.stageid = stages.id
-            INNER JOIN pipelines on stages.pipelineid = pipelines.id
-            LEFT OUTER JOIN buildstatetransitions bst ON bst.buildid = builds.id AND bst.currentState = 'Completed'
-            WHERE
-                (builds.state = 'Completed' OR ignored = true)
-                AND builds.agentUuid = #uuid#
-            ORDER BY $column$ $order$
-            LIMIT #limit#
-            OFFSET #offset#
+        SELECT
+        builds.*,
+        bst.stateChangeTime as lastTransitionTime,
+        pipelines.name AS pipelineName,
+        pipelines.label AS pipelineLabel,
+        stages.name AS stageName,
+        pipelines.counter AS pipelineCounter,
+        stages.counter AS stageCounter,
+        stages.rerunOfCounter AS rerunOfCounter
+        FROM builds
+        INNER JOIN stages on builds.stageid = stages.id
+        INNER JOIN pipelines on stages.pipelineid = pipelines.id
+        LEFT OUTER JOIN buildstatetransitions bst ON bst.buildid = builds.id AND bst.currentState = 'Completed'
+        WHERE
+        (builds.state = 'Completed' OR ignored = true)
+        AND builds.agentUuid = #uuid#
+        ORDER BY $column$ $order$
+        LIMIT #limit#
+        OFFSET #offset#
         ) AS joined
         INNER JOIN buildstatetransitions on buildstatetransitions.buildid = joined.id
         ORDER BY
