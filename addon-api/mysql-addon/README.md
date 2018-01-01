@@ -10,6 +10,13 @@ CREATE TABLE changelog (
   applied_by VARCHAR(100) NOT NULL,
   description VARCHAR(500) NOT NULL
 );
+-- Patch for H2 Specific Procedures that're being used
+DELIMITER $$
+CREATE PROCEDURE IDENTITY()
+BEGIN
+  SELECT LAST_INSERT_ID() as id;
+END $$
+DELIMITER ;
 
 ```
 

@@ -45,6 +45,6 @@ public class MySQL5Configuration extends DatabaseConfiguration {
     }
 
     public String dbUrl() {
-        return String.format("jdbc:mysql://%s:%s/%s?allowMultiQueries=true", this.getHost(), this.getPort(), this.getName());
+        return String.format("jdbc:mysql://%s:%s/%s?allowMultiQueries=true&useOldAliasMetadataBehavior=true&unicode=true&characterEncoding=UTF-8", this.getHost(), this.getPort(), this.getName());
     }
 }
