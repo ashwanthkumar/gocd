@@ -145,14 +145,14 @@
         UPDATE stages
         SET latestRun = false
         WHERE pipelineId = #pipelineId#
-        AND name = #stageName#
+            AND name = #stageName# 
     </update>
 
 
     <update id="markStageArtifactDeleted">
         UPDATE stages
-        SET artifactsDeleted = true
-        WHERE id = #stageId#
+            SET artifactsDeleted = true
+            WHERE id = #stageId#
     </update>
 
 
@@ -194,9 +194,9 @@
 
     <select id="getLastSuccessfulStageInPipeline" resultMap="Pipeline.pipeline-with-stage" cacheModel="pipelineWithLatestSuccessfulStage">
         SELECT
-        name as stageName, id as stageId,
-        pipelineId, approvalType, counter as stageCounter, completedByTransitionId, state as stageState, latestRun, fetchMaterials, cleanWorkingDir,
-        approvedBy, createdTime, orderId, result as stageResult, rerunOfCounter, pipelineLabel as label, pipelineCounter, artifactsDeleted, configVersion, lastTransitionedTime
+            name as stageName, id as stageId,
+            pipelineId, approvalType, counter as stageCounter, completedByTransitionId, state as stageState, latestRun, fetchMaterials, cleanWorkingDir,
+            approvedBy, createdTime, orderId, result as stageResult, rerunOfCounter, pipelineLabel as label, pipelineCounter, artifactsDeleted, configVersion, lastTransitionedTime
         FROM _stages
         WHERE name = #stageName#
         AND pipelineName = #pipelineName#
@@ -236,8 +236,8 @@
         SELECT name as stageName, max(counter) as stageCounter,  pipelineName,  pipelineCounter,  pipelineLabel
         FROM _stages
         WHERE pipelineName = #pipelineName# AND name = #stageName#
-        AND naturalOrder &gt; #fromNaturalOrder# AND naturalOrder &lt;= #toNaturalOrder#
-        AND result != 'Passed' AND state in ('Failed', 'Unknown')
+            AND naturalOrder &gt; #fromNaturalOrder# AND naturalOrder &lt;= #toNaturalOrder#
+            AND result != 'Passed' AND state in ('Failed', 'Unknown')
         GROUP BY name, naturalOrder, pipelineName, pipelineCounter, pipelineLabel
         ORDER BY naturalOrder DESC
     </select>
@@ -247,7 +247,7 @@
         SELECT id as stageId, name as stageName, result as stageResult, counter as stageCounter, state as stageState, *
         FROM _stages
         WHERE name = #stageName#
-        AND pipelineName = #pipelineName#
+            AND pipelineName = #pipelineName#
         ORDER BY id DESC
         LIMIT 1
     </select>
@@ -257,6 +257,35 @@
         FROM stages
         WHERE stages.pipelineId = #pipelineId# AND stages.name = #stageName# AND stages.counter = #stageCounter#
     </select>
+
+    <sql id="selectStages">
+        SELECT builds.*,builds.id as buildId,
+        stages.name as stageName,
+        stages.counter as stageCounter,
+        stages.pipelineId as pipelineId,
+        stages.approvedBy,
+        stages.createdTime,
+        stages.orderId,
+        stages.result as stageResult,
+        stages.approvalType,
+        stages.completedByTransitionId as completedByTransitionId,
+        stages.state as stageState,
+        stages.latestRun,
+        stages.fetchMaterials,
+        stages.cleanWorkingDir,
+        stages.rerunOfCounter,
+        stages.artifactsDeleted,
+        stages.configVersion,
+        stages.lastTransitionedTime,
+        resources.name as resourceName,
+        buildstatetransitions.currentState,
+        buildstatetransitions.statechangetime, buildstatetransitions.id as stateId
+        FROM stages
+        INNER JOIN builds ON stages.id = builds.stageId AND builds.ignored != true
+        LEFT JOIN resources ON builds.id = resources.buildId
+        LEFT JOIN buildstatetransitions ON builds.id = buildstatetransitions.buildId
+    </sql>
+
 
     <sql id="selectStagesWithIdentifier">
         SELECT builds.*,builds.id as buildId,
@@ -308,27 +337,27 @@
         INNER JOIN pipelines ON s.pipelineId = pipelines.id
         WHERE s.result in ('Passed', 'Failed', 'Cancelled')
         AND  b.currentState = 'Completed'  AND pipelines.name IN (
-        <iterate property="pipelineNames" conjunction=",">#pipelineNames[]#</iterate>
+            <iterate property="pipelineNames" conjunction=",">#pipelineNames[]#</iterate>
         )
     </sql>
 
     <sql id="selectForFeed">
         SELECT stages.id as stageId,
-        stages.name AS stageName,
-        stages.counter AS stageCounter,
-        stages.completedByTransitionId AS completedByTransitionId,
-        stages.state AS stageState,
-        stages.result AS stageResult,
-        stages.pipelineid as pipelineId,
-        stages.approvedBy,
-        stages.approvalType,
-        stages.latestRun,
-        stages.fetchMaterials,
-        stages.cleanWorkingDir,
-        (SELECT stateChangeTime FROM buildstatetransitions WHERE id = stages.completedByTransitionId) updateDate,
-        (SELECT pipelines.name FROM pipelines where id = stages.pipelineId) pipelineName,
-        (SELECT pipelines.counter FROM pipelines where id = stages.pipelineId) pipelineCounter,
-        (SELECT pipelines.label FROM pipelines where id = stages.pipelineId) pipelineLabel
+            stages.name AS stageName,
+            stages.counter AS stageCounter,
+            stages.completedByTransitionId AS completedByTransitionId,
+            stages.state AS stageState,
+            stages.result AS stageResult,
+            stages.pipelineid as pipelineId,
+            stages.approvedBy,
+            stages.approvalType,
+            stages.latestRun,
+            stages.fetchMaterials,
+            stages.cleanWorkingDir,
+            (SELECT stateChangeTime FROM buildstatetransitions WHERE id = stages.completedByTransitionId) updateDate,
+            (SELECT pipelines.name FROM pipelines where id = stages.pipelineId) pipelineName,
+            (SELECT pipelines.counter FROM pipelines where id = stages.pipelineId) pipelineCounter,
+            (SELECT pipelines.label FROM pipelines where id = stages.pipelineId) pipelineLabel
         FROM stages
     </sql>
 
@@ -348,20 +377,20 @@
 
     <sql id="selectStageFeedForPipeline">
         SELECT stages.id as stageId,
-        stages.name AS stageName,
-        stages.counter AS stageCounter,
-        stages.completedByTransitionId AS completedByTransitionId,
-        stages.result AS stageResult,
-        stages.latestRun,
-        stages.fetchMaterials,
-        stages.cleanWorkingDir,
-        stages.approvedBy,
-        stages.approvalType,
-        (SELECT stateChangeTime FROM buildstatetransitions WHERE id = stages.completedByTransitionId) updateDate,
-        pipelines.name as pipelineName,
-        pipelines.counter as pipelineCounter,
-        pipelines.label as pipelineLabel,
-        stages.pipelineid as pipelineId
+            stages.name AS stageName,
+            stages.counter AS stageCounter,
+            stages.completedByTransitionId AS completedByTransitionId,
+            stages.result AS stageResult,
+            stages.latestRun,
+            stages.fetchMaterials,
+            stages.cleanWorkingDir,
+            stages.approvedBy,
+            stages.approvalType,
+            (SELECT stateChangeTime FROM buildstatetransitions WHERE id = stages.completedByTransitionId) updateDate,
+            pipelines.name as pipelineName,
+            pipelines.counter as pipelineCounter,
+            pipelines.label as pipelineLabel,
+            stages.pipelineid as pipelineId
         FROM stages
         INNER JOIN pipelines on pipelines.id = stages.pipelineid
     </sql>
@@ -385,6 +414,12 @@
         <include refid="selectLatestStageInPipeline"/>
     </sql>
 
+    <sql id="selectStagesInPipeline">
+        <include refid="selectStages"/>
+        <include refid="innerJoinPipelines"/>
+        WHERE stages.pipelineId = #pipelineId#
+    </sql>
+
     <select id="getStagesByPipelineId" resultMap="select-stage-with-identifier-jobs" parameterClass="long">
         <include refid="selectStagesWithIdentifier"/>
         WHERE stages.pipelineId = #pipelineId#
@@ -406,6 +441,12 @@
         AND pipelines.counter = #pipelineCounter#
         AND stages.name = #stageName#
         ORDER BY stages.counter
+    </select>
+
+    <select id="getStageByCounter" resultMap="select-stage-map">
+        <include refid="selectStages"/>
+        WHERE stages.name = #stageName# AND stages.counter = #counter# AND stages.pipelineId = #pipelineId#
+        ORDER BY builds.name, buildstatetransitions.statechangetime
     </select>
 
     <select id="getStageById" resultMap="select-stage-with-identifier-jobs" parameterClass="long">
@@ -466,20 +507,20 @@
         SELECT COUNT(*)
         FROM _stages
         WHERE id > #stageId#
-        AND name = #stageName#
-        AND pipelineName = #pipelineName#
+            AND name = #stageName#
+            AND pipelineName = #pipelineName#
     </select>
 
     <select id="getStageHistoryCount" resultClass="java.lang.Integer">
         SELECT COUNT(1)
         FROM _stages
         WHERE name = #stageName#
-        AND pipelineName = #pipelineName#
+            AND pipelineName = #pipelineName#
     </select>
 
     <select id="findStageHistoryPage" resultMap="select-stage-history-entry">
         SELECT
-        id as stageId, name as stageName, counter as stageCounter, state as stageState, *
+            id as stageId, name as stageName, counter as stageCounter, state as stageState, *
         FROM _stages
         WHERE name = #stageName#
         AND pipelineName = #pipelineName#
@@ -489,12 +530,12 @@
 
     <select id="findStageHistoryEntryBefore" resultMap="select-stage-history-entry">
         SELECT
-        id as stageId, name as stageName, counter as stageCounter, state as stageState, *
+            id as stageId, name as stageName, counter as stageCounter, state as stageState, *
         FROM _stages
         WHERE
-        name = #stageName#
-        AND pipelineName = #pipelineName#
-        AND id > #id#
+          name = #stageName#
+          AND pipelineName = #pipelineName#
+          AND id > #id#
         ORDER BY id
         LIMIT #limit#
     </select>
@@ -508,13 +549,13 @@
         JOIN pipelines ON pipelines.id = stages.pipelineId
         INNER JOIN builds ON stages.id = builds.stageId AND builds.ignored != true
         WHERE stages.id IN (
-        SELECT
-        id
-        FROM _stages
-        WHERE name = #stageName#
-        AND pipelineName = #pipelineName#
-        ORDER BY id DESC
-        LIMIT #limit# OFFSET #offset#
+            SELECT
+            id
+            FROM _stages
+            WHERE name = #stageName#
+            AND pipelineName = #pipelineName#
+            ORDER BY id DESC
+            LIMIT #limit# OFFSET #offset#
         )
         ORDER BY stages.id DESC
     </select>
@@ -523,11 +564,11 @@
         <include refid="selectStagesInIds"/>
         (
         SELECT
-        stages.id
+            stages.id
         FROM stages
-        INNER JOIN pipelines ON stages.pipelineId = pipelines.id AND stages.name = #stageName# AND pipelines.name = #pipelineName#
-        AND result = 'Passed'
-        ORDER BY id LIMIT #limit# OFFSET #offset#)
+            INNER JOIN pipelines ON stages.pipelineId = pipelines.id AND stages.name = #stageName# AND pipelines.name = #pipelineName#
+            AND result = 'Passed'
+            ORDER BY id LIMIT #limit# OFFSET #offset#)
         AND stages.result = 'Passed'
         ORDER BY stages.id, builds.name, buildstatetransitions.statechangetime
     </select>
@@ -549,6 +590,11 @@
         ORDER BY stages.id, stages.lastTransitionedTime
         LIMIT #limit# OFFSET #offset#
     ]]>
+    </select>
+
+    <select id="getScheduledStages" resultMap="select-stage-map">
+        <include refid="selectStages"/>
+        WHERE builds.state = 'Scheduled'
     </select>
 
     <select id="getStageByBuildId" parameterClass="long" resultMap="select-stage-without-builds">
@@ -701,8 +747,8 @@
         SELECT pipelineName, pipelineCounter, pipelineLabel, id as stageId, name as stageName, counter as stageCounter
         FROM _stages
         WHERE locked = true
-        AND pipelineId = #pipelineId#
-        AND latestRun = true
+            AND pipelineId = #pipelineId#
+            AND latestRun = true
         ORDER BY id DESC
         LIMIT 1
     </select>
